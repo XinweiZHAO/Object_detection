@@ -26,12 +26,7 @@ int main()
 	for (;;)/*loop until happy*/
 	{
 		cap >> frame;
-		try{
-			obj_center = find_object_corord.SURF_Objdetector(frame);
-		}
-		catch (cv::Exception& e) {
-			printf("exception: %s\n", e.what());
-		}
+		obj_center = find_object_corord.SURF_Objdetector(frame);
 		//escape the loop
 		escapeKey = waitKey(10);
 		if (escapeKey == 27 || escapeKey == 'q' || escapeKey == 'Q'){
