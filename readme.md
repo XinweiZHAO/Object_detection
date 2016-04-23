@@ -1,4 +1,4 @@
-#Objection detection Repository
+#Object detection Repository
 ## 1. SURF(Speeded-Up Robust Features)
 **SURF based object detection**
 
@@ -27,9 +27,9 @@ Both methods set a `thresholdGoodMatches` for the number of good_matches, if lar
 
 ```cpp
 if (!obj_descritor.empty() && !screne_descritor.empty())
-	{
-		//details
-	}
+{
+	//details
+}
 ```
 
     2. the Homography Matrix may not always be found 
@@ -37,9 +37,9 @@ if (!obj_descritor.empty() && !screne_descritor.empty())
 ```cpp
 Mat H = findHomography(obj_SURFkp, scene_SURFkp, RANSAC);
 if (!H.empty())//Homography Matrix may not be found
-    {
-        //details
-    }
+{
+	//details
+}
 ```
 
 
