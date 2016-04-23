@@ -194,8 +194,6 @@ Mat SURF_Object_detector::drawGoodMatches(const Mat& img1,
 	std::vector<Point2f> scene_SURFkp;
 	if (good_matches.size() >= thresholdGoodMatches)
 	{
-		//object detected in current screne
-		detected_flag = true;
 		//Display that the object is found
 		putText(img_matches, "Object Found", Point2f(10, 50), FONT_HERSHEY_COMPLEX_SMALL, 2, Scalar(0, 0, 250), 1, CV_AA);
 		for (size_t i = 0; i < good_matches.size(); i++)
@@ -210,6 +208,8 @@ Mat SURF_Object_detector::drawGoodMatches(const Mat& img1,
 		Mat H = findHomography(obj_SURFkp, scene_SURFkp, RANSAC);
 		if (!H.empty())//Homography Matrix may not be found
 		{
+			//object detected in current screne
+			detected_flag = true;
 			perspectiveTransform(obj_corners, scene_corners, H);
 			scene_corners_ = scene_corners;//output the screne corner
 			//-- Draw lines between the corners (the mapped object in the scene - image_2 )
