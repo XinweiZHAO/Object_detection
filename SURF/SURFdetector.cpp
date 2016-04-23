@@ -124,7 +124,7 @@ Point2f SURF_Object_detector::SURF_Objdetector(Mat capture)
 	if (good_matches.size() >= thresholdGoodMatches)
 	{
 		//Display that the object is found
-		putText(img_matches, "Object Found", Point2f(10, 50), FONT_HERSHEY_COMPLEX_SMALL, 2, cvScalar(0, 0, 250), 1, CV_AA);
+		putText(img_matches, "Object Found", Point2f(10, 50), FONT_HERSHEY_COMPLEX_SMALL, 2, Scalar(0, 0, 250), 1, CV_AA);
 		for (unsigned int i = 0; i < good_matches.size(); i++)
 		{
 			//Get the keypoints from the good matches
