@@ -1,0 +1,2 @@
+opencv_traincascade -data trainclassifier -vec prepared_img\pos\obj.vec -bg prepared_img\neg\neg.dat -numStages 12 -precalcValBufSize 1024 -precalcIdxBufSize 1024 -minHitRate 0.9999 -maxFalseAlarmRate 0.5 -numPos 1900 -numNeg 2000 -w 32 -h 24
+pause
