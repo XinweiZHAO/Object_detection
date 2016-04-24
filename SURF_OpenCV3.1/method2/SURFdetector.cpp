@@ -112,6 +112,8 @@ Point2f SURF_Object_detector::SURF_Objdetector(UMat capture, bool detected_flag)
 	}
 	else
 	{
+		//object not detected
+		detected_flag = false;
 		img_matches = Mat::ones(480, 640, CV_32F);
 		putText(img_matches, "Current screne No keypoints", Point2f(10, 50), FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255), 1, CV_AA);
 		imshow("Good Matches", img_matches);
@@ -235,6 +237,10 @@ Mat SURF_Object_detector::drawGoodMatches(const Mat& img1,
 					scene_corners[2].x, scene_corners[2].y, scene_corners[3].x, scene_corners[3].y, \
 					obj_center.x, obj_center.y);
 			}
+		}
+		else{
+			//object not detected
+			detected_flag = false;
 		}
 	}
 	else
