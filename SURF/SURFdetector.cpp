@@ -18,26 +18,27 @@
 %  input para:
 %  output para:
 %
-%  update time: 2016.4.13
+%  update time: 2016.4.24
 *********************************************************************/
 SURF_Object_detector::SURF_Object_detector()
 {
-	help();
+	Info_out = true;
+	if (Info_out){ help(); }
 	timecount = true;
 	testing = false;
 	minHess = 2000;
 	detector = SurfFeatureDetector(minHess);
 	obj_corners = vector<Point2f>(4);
 	thresholdMatchingNN = 0.7;
-	thresholdGoodMatches = 15;
-	
+	thresholdGoodMatches = 20;
+
 }
 SURF_Object_detector::~SURF_Object_detector()
 {
 	cout << "Detect Over";
 }
 /* *****************************************************************
-%  Function name: Objimgload
+%  Function name: ObjimgSURF
 %  Usage : use to load the object image
 %  input para:
 %
@@ -73,26 +74,25 @@ int SURF_Object_detector::ObjimgSURF()
 %  Function name: SURF_Objdetector
 %  Usage : main function to detect object
 %  input para:
-%			 capture: captured image(detect oject from where)
-%
+%			capture: captured image(detect oject from where)
+%			detected_flag: only if object is detected in current screne,
+%							 the position information is meaningful
 %  output para:
-%
-%  update time: 2016.4.13
+%			obj_center: detected object center position
+%  update time: 2016.4.24
 *********************************************************************/
-Point2f SURF_Object_detector::SURF_Objdetector(Mat capture)
+Point2f SURF_Object_detector::SURF_Objdetector(Mat capture, bool detected_flag)
 {
 	//class Dmatch: Class for matching keypoint descriptors
 	vector<vector<DMatch>> matches;//many matchs 
 	vector<DMatch> good_matches;//good matchs
-	vector<Point2f> obj_SURFkp;
-	vector<Point2f> scene_SURFkp;
+	vector<Point2f> obj_SURFkp;//final object's good points, use to find homography matrix
+	vector<Point2f> scene_SURFkp;//final current frame's good points, use to find homography matrix
 	vector<Point2f> scene_corners(4);
 	/*==============screne information==============*/
 	//captured screne keypoits and descriptor
 	vector<KeyPoint> screne_kpoints;
 	Mat screne_descritor;
-
-	
 
 	if (timecount)//COUNT TIME	
 	{
@@ -103,65 +103,91 @@ Point2f SURF_Object_detector::SURF_Objdetector(Mat capture)
 	//detect current screne feature points and build up descriptor
 	detector.detect(GRAY_screne, screne_kpoints);//detect keypoints
 	extractor.compute(GRAY_screne, screne_kpoints, screne_descritor);//computer descriptor
-	/* k=2 -> Count of best matches found per each query descriptor or less if a
-	* query descriptor has less than k possible matches in total.*/
-	matcher.knnMatch(obj_descritor, screne_descritor, matches, 2);
-
-	for (int i = 0; i < min(screne_descritor.rows - 1, (int)matches.size()); i++) //THIS LOOP IS SENSITIVE TO SEGFAULTS
+	Mat img_matches;//Matching results
+	if (!obj_descritor.empty() && !screne_descritor.empty())
 	{
-		if ((matches[i][0].distance < thresholdMatchingNN*(matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
-		{
-			good_matches.push_back(matches[i][0]);//Adds elements to the bottom of the matrix
-		}
-	}
+		/* k=2 -> Count of best matches found per each query descriptor or less if a
+		* query descriptor has less than k possible matches in total.*/
+		matcher.knnMatch(obj_descritor, screne_descritor, matches, 2);
 
-	//Draw only "good" matches
-	drawMatches(loadobjetimage, obj_kpoints, GRAY_screne, screne_kpoints, good_matches, img_matches, Scalar::all(-1), Scalar::all(-1), vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-
-	obj_center.x = (scene_corners[0].x + scene_corners[1].x + scene_corners[2].x + scene_corners[3].x) / 4;
-	obj_center.y = (scene_corners[0].y + scene_corners[1].y + scene_corners[2].y + scene_corners[3].y) / 4;
-	
-	if (good_matches.size() >= thresholdGoodMatches)
-	{
-		//Display that the object is found
-		putText(img_matches, "Object Found", Point2f(10, 50), FONT_HERSHEY_COMPLEX_SMALL, 2, Scalar(0, 0, 250), 1, CV_AA);
-		for (unsigned int i = 0; i < good_matches.size(); i++)
+		for (int i = 0; i < min(screne_descritor.rows - 1, (int)matches.size()); i++) //THIS LOOP IS SENSITIVE TO SEGFAULTS
 		{
-			//Get the keypoints from the good matches
-			obj_SURFkp.push_back(obj_kpoints[good_matches[i].queryIdx].pt);
-			scene_SURFkp.push_back(screne_kpoints[good_matches[i].trainIdx].pt);
+			if ((matches[i][0].distance < thresholdMatchingNN*(matches[i][1].distance)) && ((int)matches[i].size() <= 2 && (int)matches[i].size()>0))
+			{
+				good_matches.push_back(matches[i][0]);//Adds elements to the bottom of the matrix
+			}
 		}
 
-		H = findHomography(obj_SURFkp, scene_SURFkp, CV_RANSAC);
+		//Draw only "good" matches
+		drawMatches(loadobjetimage, obj_kpoints, GRAY_screne, screne_kpoints, good_matches, img_matches, Scalar::all(-1), Scalar::all(-1), vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
 
-		perspectiveTransform(obj_corners, scene_corners, H);
+		if (good_matches.size() >= thresholdGoodMatches)
+		{
+			//Display that the object is found
+			putText(img_matches, "Object Found", Point2f(10, 50), FONT_HERSHEY_COMPLEX_SMALL, 2, Scalar(0, 0, 250), 1, CV_AA);
+			for (unsigned int i = 0; i < good_matches.size(); i++)
+			{
+				//Get the keypoints from the good matches
+				obj_SURFkp.push_back(obj_kpoints[good_matches[i].queryIdx].pt);
+				scene_SURFkp.push_back(screne_kpoints[good_matches[i].trainIdx].pt);
+			}
 
-		//Draw lines between the corners (the mapped object in the scene image )
-		line(img_matches, scene_corners[0] + Point2f(loadobjetimage.cols, 0), scene_corners[1] + Point2f(loadobjetimage.cols, 0), Scalar(0, 255, 0), 4);
-		line(img_matches, scene_corners[1] + Point2f(loadobjetimage.cols, 0), scene_corners[2] + Point2f(loadobjetimage.cols, 0), Scalar(0, 255, 0), 4);
-		line(img_matches, scene_corners[2] + Point2f(loadobjetimage.cols, 0), scene_corners[3] + Point2f(loadobjetimage.cols, 0), Scalar(0, 255, 0), 4);
-		line(img_matches, scene_corners[3] + Point2f(loadobjetimage.cols, 0), scene_corners[0] + Point2f(loadobjetimage.cols, 0), Scalar(0, 255, 0), 4);
-		//Draw object center points
-		circle(img_matches, (scene_corners[0] + scene_corners[1] + scene_corners[2] + scene_corners[3])*0.25 + Point2f(loadobjetimage.cols, 0), 8, Scalar(0, 0, 255), -1, 8, 0);
-		//print out the object corners and center point coordinate
-		printf("Object corner: 00(%f, %f), 10(%f, %f)\n"
-			"               11(%f, %f), 01(%f, %f)pixels \n"
-			"       center:(%f,%f) pixels\n", scene_corners[0].x, scene_corners[0].y, scene_corners[1].x, scene_corners[1].y, \
-			scene_corners[2].x, scene_corners[2].y, scene_corners[3].x, scene_corners[3].y, \
-			obj_center.x, obj_center.y);
+			Mat H = findHomography(obj_SURFkp, scene_SURFkp, CV_RANSAC);//homography matrix
+			if (!H.empty())//Homography Matrix may not be found
+			{
+				//object detected in current screne
+				detected_flag = true;
+
+				perspectiveTransform(obj_corners, scene_corners, H);
+
+				//Draw lines between the corners (the mapped object in the scene image )
+				line(img_matches, scene_corners[0] + Point2f(loadobjetimage.cols, 0), scene_corners[1] + Point2f(loadobjetimage.cols, 0), Scalar(0, 255, 0), 4);
+				line(img_matches, scene_corners[1] + Point2f(loadobjetimage.cols, 0), scene_corners[2] + Point2f(loadobjetimage.cols, 0), Scalar(0, 255, 0), 4);
+				line(img_matches, scene_corners[2] + Point2f(loadobjetimage.cols, 0), scene_corners[3] + Point2f(loadobjetimage.cols, 0), Scalar(0, 255, 0), 4);
+				line(img_matches, scene_corners[3] + Point2f(loadobjetimage.cols, 0), scene_corners[0] + Point2f(loadobjetimage.cols, 0), Scalar(0, 255, 0), 4);
+				//Draw object center points
+				circle(img_matches, (scene_corners[0] + scene_corners[1] + scene_corners[2] + scene_corners[3])*0.25 + Point2f(loadobjetimage.cols, 0), 8, Scalar(0, 0, 255), -1, 8, 0);
+				//find the center points
+				obj_center.x = (scene_corners[0].x + scene_corners[1].x + scene_corners[2].x + scene_corners[3].x) / 4;
+				obj_center.y = (scene_corners[0].y + scene_corners[1].y + scene_corners[2].y + scene_corners[3].y) / 4;
+				if (Info_out){
+					//print out the object corners and center point coordinate
+					printf("Object corner: 00(%f, %f), 10(%f, %f)\n"
+						"               11(%f, %f), 01(%f, %f)pixels \n"
+						"       center:(%f,%f) pixels\n", scene_corners[0].x, scene_corners[0].y, scene_corners[1].x, scene_corners[1].y, \
+						scene_corners[2].x, scene_corners[2].y, scene_corners[3].x, scene_corners[3].y, \
+						obj_center.x, obj_center.y);
+				}
+			}
+			else{
+				//object not detected
+				detected_flag = false;
+			}
+		}
+		else
+		{
+			//object not detected
+			detected_flag = false;
+			putText(img_matches, "Object Not Found", Point2f(10, 50), FONT_HERSHEY_COMPLEX_SMALL, 2, Scalar(0, 0, 250), 1, CV_AA);
+		}
+		//show the SURF maching results
+		imshow("Good Matches", img_matches);
 	}
 	else
 	{
-		putText(img_matches, "Object Not Found", Point2f(10, 50), FONT_HERSHEY_COMPLEX_SMALL, 2, Scalar(0, 0, 250), 1, CV_AA);
+		//object not detected
+		detected_flag = false;
+		img_matches = Mat::ones(480, 640, CV_32F);
+		putText(img_matches, "Current screne No keypoints", Point2f(10, 50), FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255), 1, CV_AA);
+		imshow("Good Matches", img_matches);
 	}
-
-	//show the SURF maching results
-	imshow("Good Matches", img_matches);
 	//print out each loop time
 	if (timecount)
 	{
 		t = 1000.*((double)getTickCount() - t) / (double)getTickFrequency();
-		printf("       detection time = %g ms\n", t);
+		if (Info_out){
+			printf("       detection time = %g ms\n", t);
+		}
 	}
 	return obj_center;
 

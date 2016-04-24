@@ -11,7 +11,11 @@
 
 int main()
 {
+	bool detected_flag = false;//init detected flag
 	SURF_Object_detector find_object_corord;
+	/*load training image
+	* image path needed to be redefineds
+	*/
 	find_object_corord.loadobjetimage = imread("MGeo.bmp", CV_LOAD_IMAGE_GRAYSCALE);
 	find_object_corord.ObjimgSURF();//clacluate the definded object feature points and buit up descriptor
 	namedWindow("Good Matches", CV_WINDOW_AUTOSIZE);
@@ -26,7 +30,11 @@ int main()
 	for (;;)/*loop until happy*/
 	{
 		cap >> frame;
-		obj_center = find_object_corord.SURF_Objdetector(frame);
+		obj_center = find_object_corord.SURF_Objdetector(frame, detected_flag);
+		if (detected_flag)
+		{
+			//obj_center can be used
+		}
 		//escape the loop
 		escapeKey = waitKey(10);
 		if (escapeKey == 27 || escapeKey == 'q' || escapeKey == 'Q'){

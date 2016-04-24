@@ -1,7 +1,9 @@
-/*This code is based on Author: Frank, date: 2013
-* Modify by XinweiZHAO
-* Date: 2016.4.10
-*/
+//===============================================================
+//File name : SURFdetector.h
+//     Usage : head file for Object detection by SURF
+//     Create Date : 2016.4.13
+//OpenCV Version 2.4.9
+//Author : XinweiZHAO
 #ifndef _SURF_Object_detector_
 #define _SURF_Object_detector_
 /*include the OpenCV2.4.9 Framework*/
@@ -22,7 +24,7 @@ class SURF_Object_detector
 public:
 	SURF_Object_detector();
 	~SURF_Object_detector();
-	Point2f SURF_Objdetector(Mat capture);
+	Point2f SURF_Objdetector(Mat capture, bool detected_flag);
 	int ObjimgSURF();
 	Mat loadobjetimage;
 
@@ -31,6 +33,7 @@ private:
 	bool timecount;
 	//use to do performance analysis
 	bool testing;
+	bool Info_out;//whether to printout the detection information
 	double t; //timing variable
 	//SURF Detector, and descriptor parameters, match object initialization
 	int minHess;//minHess->Threshold for hessian keypoint detector used in SURF
@@ -50,8 +53,6 @@ private:
 	* FlannBasedMatcher-> class FlannBasedMatcher : public DescriptorMatcher
 	*/
 	FlannBasedMatcher matcher;//Fast Approximate Nearest Neighbor Search
-	Mat H;//homography
-	Mat img_matches;//Matching results
 
 	/*keypoints Macthing parameters*/
 	float thresholdMatchingNN;
