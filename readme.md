@@ -41,6 +41,9 @@ if (!H.empty())//Homography Matrix may not be found
 	//details
 }
 ```
-
-
- 
+## 2. Cascade Classification
+	Step1 : use \gen_img\gen_neg.py and \gen_img\gen_pos.py to generate positive and negative images and store these images to \prepared_img\neg and \prepared_img\pos folder.
+	Step2 : use \prepared_img\pos\route.bat to generate the information for positive images(pos.dat) and use \prepared_img\neg\gen_negpath.py for negative images(neg.dat).
+	Step3 : use \obj_boxselect to find the object in the positive images and add these information(pixel coordinate for box's four corners) to \prepared_img\pos\pos.dat
+	Step4 : use create_obj_samples.bat and opencv_createsamples.exe to generate \prepared_img\pos\obj.vec, the parameters in create_obj_samples.bat should be modified for particular use.
+	Step5 : use train_cascade.bat and opencv_traincascade.exe to train the classifier and store the result in \trainclassifier
