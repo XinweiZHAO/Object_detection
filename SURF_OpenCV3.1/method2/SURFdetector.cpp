@@ -27,7 +27,7 @@ SURF_Object_detector::SURF_Object_detector()
 	timecount = true;
 	testing = false;
 	obj_corners = vector<Point2f>(4);
-	thresholdMatchingNN = 0.6;
+	thresholdMatchingNN = 0.65;
 	thresholdGoodMatches = 25;
 }
 SURF_Object_detector::~SURF_Object_detector()
@@ -35,7 +35,7 @@ SURF_Object_detector::~SURF_Object_detector()
 	cout << "Detect Over";
 }
 /* *****************************************************************
-%  Function name: Objimgload
+%  Function name: ObjimgSURF
 %  Usage : use to load the object image
 %  input para:
 %
@@ -76,7 +76,7 @@ int SURF_Object_detector::ObjimgSURF()
 %			obj_center: detected object center position
 %  update time: 2016.4.23
 *********************************************************************/
-Point2f SURF_Object_detector::SURF_Objdetector(UMat capture, bool detected_flag)
+Point2f SURF_Object_detector::SURF_Objdetector(UMat capture, bool & detected_flag)
 {
 	//class Dmatch: Class for matching keypoint descriptors
 	vector<vector<DMatch>> matches;//many matchs finded
@@ -154,7 +154,7 @@ Mat SURF_Object_detector::drawGoodMatches(const Mat& img1,
 	std::vector<vector<DMatch>>& matches,
 	std::vector<Point2f>& scene_corners_,
 	Mat	screne_descritor,
-	bool detected_flag
+	bool & detected_flag
 	)
 {
 	//-- find good matches
@@ -263,7 +263,7 @@ Mat SURF_Object_detector::drawGoodMatches(const Mat& img1,
 void SURF_Object_detector::help()
 {
 	cout << "\nThis program is SURF based object detection\n"
-		"This program is tested in OpenCV 2.4.9\n"
+		"This program is tested in OpenCV3.1 and opencv_contrib\n"
 		"an objcvt image is needed before running this code.\n"
 		"Step1 : detect all the scale invariant feature/interesting points\n"
 		"Step2 : build up the descriptors for these points\n"

@@ -31,7 +31,7 @@ class SURF_Object_detector
 public:
 	SURF_Object_detector();
 	~SURF_Object_detector();
-	Point2f SURF_Objdetector(UMat capture, bool detected_flag);
+	Point2f SURF_Objdetector(UMat capture, bool & detected_flag);
 	int ObjimgSURF();
 	Mat drawGoodMatches(const Mat& img1,
 		const Mat& img2,
@@ -40,7 +40,7 @@ public:
 		std::vector<vector<DMatch>>& matches,
 		std::vector<Point2f>& scene_corners_,
 		Mat	screne_descritor,
-		bool detected_flag
+		bool & detected_flag
 		);
 	UMat _loadobjetimage;//object image
 	Mat loadobjetimage;
@@ -95,7 +95,6 @@ private:
 	SURFMatcher<BFMatcher> matcher;
 	//SURFMatcher<FlannBasedMatcher> matcher;
 	Mat H;//homography matrix
-	Mat img_matches;//Matching results
 
 	/*keypoints Matching parameters*/
 	//float matchdistance;//use to define a good match
