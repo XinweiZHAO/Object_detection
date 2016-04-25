@@ -28,6 +28,7 @@ int main()
 	{
 		cap >> frame;
 		obj_center = find_object_corord.SURF_Objdetector(frame, detected_flag);
+		cout << detected_flag;
 		if (detected_flag)
 		{
 			//obj_center can be used

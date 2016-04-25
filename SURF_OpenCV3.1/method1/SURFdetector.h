@@ -31,7 +31,7 @@ class SURF_Object_detector
 public:
 	SURF_Object_detector();
 	~SURF_Object_detector();
-	Point2f SURF_Objdetector(UMat capture, bool detected_flag);
+	Point2f SURF_Objdetector(UMat capture, bool & detected_flag);
 	int ObjimgSURF();
 	Mat drawGoodMatches(const Mat& img1,
 		const Mat& img2,
@@ -39,7 +39,7 @@ public:
 		const std::vector<KeyPoint>& keypoints2,
 		std::vector<DMatch>& matches,
 		std::vector<Point2f>& scene_corners_,
-		bool detected_flag
+		bool & detected_flag
 		);
 	UMat _loadobjetimage;//object image
 	Mat loadobjetimage;
