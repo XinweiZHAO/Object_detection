@@ -81,7 +81,7 @@ int SURF_Object_detector::ObjimgSURF()
 %			obj_center: detected object center position
 %  update time: 2016.4.24
 *********************************************************************/
-Point2f SURF_Object_detector::SURF_Objdetector(Mat capture, bool detected_flag)
+Point2f SURF_Object_detector::SURF_Objdetector(Mat capture, bool & detected_flag)
 {
 	//class Dmatch: Class for matching keypoint descriptors
 	vector<vector<DMatch>> matches;//many matchs 

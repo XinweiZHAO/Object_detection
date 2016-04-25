@@ -24,7 +24,7 @@ class SURF_Object_detector
 public:
 	SURF_Object_detector();
 	~SURF_Object_detector();
-	Point2f SURF_Objdetector(Mat capture, bool detected_flag);
+	Point2f SURF_Objdetector(Mat capture, bool & detected_flag);
 	int ObjimgSURF();
 	Mat loadobjetimage;
 
